@@ -29,6 +29,8 @@ Parameters:
     - db.m3.large
     - db.m3.xlarge
     - db.m3.2xlarge
+    - db.m4.large
+    - db.m4.xlarge
     - db.m4.2xlarge
     - db.r3.large
     - db.r3.xlarge
@@ -46,7 +48,7 @@ Parameters:
     - db.m1.large
     - db.m1.xlarge
     ConstraintDescription: Must select a valid database instance type.
-    Default: db.m4.2xlarge
+    Default: db.m4.large
     Description: The name of the compute and memory capacity class of the DB instance.
     Type: String
   DBIops:
@@ -159,15 +161,15 @@ Resources:
         Value: !Sub MySQLDB-${AWS::StackName}
 Outputs:
   RDSEndPoints:
-    Description: Amazon Aurora Endpoint to connect
+    Description: MySQL Endpoint to connect
     Value: !Sub ${MySQLDB.Endpoint.Address}:${MySQLDB.Endpoint.Port}/${DBName}
   DBName:
     Description: MySQL DBName
     Value: !Ref DBName
   RDSEndPointAddress:
-    Description: Amazon Aurora Endpoint to connect
+    Description: MySQL Endpoint to connect
     Value: !Sub ${MySQLDB.Endpoint.Address}
   RDSEndPointPort:
-    Description: Amazon Aurora Endpoint to connect
+    Description: MySQL Endpoint to connect
     Value: !Sub ${MySQLDB.Endpoint.Port}
 ...

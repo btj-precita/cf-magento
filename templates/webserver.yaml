@@ -40,9 +40,6 @@ Parameters:
     Description: DNS Name for the magento site, you should create an alias for the
       ELB after the stack creation
     Type: String
-  EFSSecurityGroup:
-    Description: EFS Security Group
-    Type: AWS::EC2::SecurityGroup::Id
   ELBSecurityGroup:
     Description: ELB Security Group
     Type: AWS::EC2::SecurityGroup::Id
@@ -91,7 +88,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: quickstart-reference
+    Default: precita-sources
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -100,7 +97,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
-    Default: magento/latest/
+    Default: cloudformation/magento/dev/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -214,34 +211,6 @@ Conditions:
     - !Ref DNSName
     - ''
 Resources:
-  FileSystem:
-    Type: AWS::EFS::FileSystem
-    Properties:
-      PerformanceMode: generalPurpose
-      Encrypted: true
-      FileSystemTags:
-      - Key: Name
-        Value: EFS AWS Quick Start
-  MountTarget1:
-    Type: AWS::EFS::MountTarget
-    Properties:
-      FileSystemId: !Ref FileSystem
-      SubnetId:
-        !Select
-        - '0'
-        - !Ref WebServerSubnets
-      SecurityGroups:
-      - !Ref EFSSecurityGroup
-  MountTarget2:
-    Type: AWS::EFS::MountTarget
-    Properties:
-      FileSystemId: !Ref FileSystem
-      SubnetId:
-        !Select
-        - '1'
-        - !Ref WebServerSubnets
-      SecurityGroups:
-      - !Ref EFSSecurityGroup
   MagentoMainLogGroup:
     Type: AWS::Logs::LogGroup
   NewIamInstanceRole:
@@ -287,9 +256,6 @@ Resources:
       Timeout: '3600'
   MagentoAMI:
     Type: AWS::EC2::Instance
-    DependsOn:
-    - MountTarget1
-    - MountTarget2
     Metadata:
       Comment: Install a Magento web server
       AWS::CloudFormation::Authentication:
@@ -371,7 +337,6 @@ Resources:
                   AdminUserName|${AdminUserName}
                   AdminPassword|${AdminPassword}
                   ElastiCacheEndpoint|${ElastiCacheEndpoint}
-                  FileSystem|${FileSystem}
                   MagentoReleaseMedia|${MagentoReleaseMedia}
                   SSLCertificateId|${SSLCertificateId}
                   MagentoLanguage|${MagentoLanguage}
@@ -426,9 +391,9 @@ Resources:
             /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/adminuri`" -r "Build Process Complete" '${MagentoAMIWaitHandle}'
       Tags:
       - Key: Application
-        Value: AWS Quick Start (Magento)
+        Value: AWS Precita (Magento)
       - Key: Name
-        Value: MagentoAMI (AWS Quick Start)
+        Value: MagentoAMI (AWS Precita)
   AMIInfoFunctionExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -562,13 +527,6 @@ Resources:
       - !Ref WebServerSecurityGroup
       IamInstanceProfile: !Ref NewIamInstanceProfile
       KeyName: !Ref KeyPair
-      UserData:
-        !Base64
-          Fn::Sub: |
-            #cloud-config
-            runcmd:
-            - echo "${FileSystem}.efs.${AWS::Region}.amazonaws.com:/    /var/www/html/pub/media   nfs4    defaults" >> /etc/fstab
-            - mount -a
   WebServerTargetTrackingScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
