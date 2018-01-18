@@ -66,6 +66,11 @@ Metadata:
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
+    - Label:
+        default: Deployment Configuration
+      Parameters:
+      - DeployerAccessKey
+      - DeployerSecretKey
     ParameterLabels:
       AccessCIDR:
         default: Permitted IP range
@@ -139,6 +144,10 @@ Metadata:
         default: AWS Quick Start S3 bucket name
       QSS3KeyPrefix:
         default: AWS Quick Start S3 key prefix
+      DeployerAccessKey:
+        default: Access key of deployer
+      DeployerSecretKey:
+        default: Secret key of deployer
       RemoteAccessCIDR:
         default: Allowed bastion external access CIDR
       SSLCertificateId:
@@ -157,7 +166,7 @@ Parameters:
   AccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.0.0/16
+    Default: 10.1.0.0/16
     Description: 'The CIDR IP range that is permitted to access Magento instances.
       Note: a value of 0.0.0.0/0 will allow access from ANY ip address'
     Type: String
@@ -395,7 +404,7 @@ Parameters:
       the Magento store (Check here for the supported Language command http://devdocs.magento.com/guides/v2.0/install-gde/install/cli/install-cli-install.html)
     Type: String
   MagentoReleaseMedia:
-    Default: ''
+    Default: 'https://s3-ap-southeast-2.amazonaws.com/precita-sources/Magento-CE-2.1.11-2017-12-11-08-55-15.tar.gz'
     Description: Amazon S3 path to download magento .tar.gz file (https://s3.amazonaws.com/mybucket/Magento-CE-2.1.9_sample_data-2017-09-13-03-57-21.tar.gz)
     Type: String
   MagentoTimezone:
@@ -412,26 +421,26 @@ Parameters:
   PrivateSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.0.0/19
+    Default: 10.1.0.0/19
     Description: CIDR block for private subnet 1 located in Availability Zone 1.
     Type: String
   PrivateSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.32.0/19
+    Default: 10.1.32.0/19
     Description: CIDR block for private subnet 2 located in Availability Zone 2.
     Type: String
   PublicSubnet1CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.128.0/20
+    Default: 10.1.128.0/20
     Description: CIDR Block for the public DMZ subnet 1 located in Availability Zone
       1
     Type: String
   PublicSubnet2CIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.144.0/20
+    Default: 10.1.144.0/20
     Description: CIDR Block for the public DMZ subnet 2 located in Availability Zone
       2
     Type: String
@@ -454,6 +463,12 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
+  DeployerAccessKey:
+    Description: Access key of deployer
+    Type: String
+  DeployerSecretKey:
+    Description: Secret key of deployer
+    Type: String
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
@@ -468,7 +483,7 @@ Parameters:
   VPCCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.0.0/16
+    Default: 10.1.0.0/16
     Description: CIDR Block for the VPC
     Type: String
   WebServerDesiredCapacity:
@@ -627,6 +642,8 @@ Resources:
         PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        DeployerAccessKey: !Ref DeployerAccessKey
+        DeployerSecretKey: !Ref DeployerSecretKey
         SSLCertificateId: !Ref SSLCertificateId
         VPCCIDR: !GetAtt VPCStack.Outputs.VPCCIDR
         VPCID: !GetAtt VPCStack.Outputs.VPCID

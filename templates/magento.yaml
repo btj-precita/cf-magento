@@ -63,6 +63,11 @@ Metadata:
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
+    - Label:
+        default: Deployment Configuration
+      Parameters:
+      - DeployerAccessKey
+      - DeployerSecretKey
     ParameterLabels:
       AccessCIDR:
         default: Permitted IP range
@@ -130,6 +135,10 @@ Metadata:
         default: AWS Quick Start S3 bucket name
       QSS3KeyPrefix:
         default: AWS Quick Start S3 key prefix
+      DeployerAccessKey:
+        default: Access key of deployer
+      DeployerSecretKey:
+        default: Secret key of deployer
       SSLCertificateId:
         default: SSL certificate ARN
       VPCCIDR:
@@ -395,6 +404,12 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
+  DeployerAccessKey:
+    Description: Access key of deployer
+    Type: String
+  DeployerSecretKey:
+    Description: Secret key of deployer
+    Type: String
   SSLCertificateId:
     Default: ''
     Description: (Optional) The ARN of the SSL certificate to use for the webserver.
@@ -559,6 +574,8 @@ Resources:
         VPCID: !Ref VPCID
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        DeployerAccessKey: !Ref DeployerAccessKey
+        DeployerSecretKey: !Ref DeployerSecretKey
         MagentoCurrency: !Ref MagentoCurrency
         MagentoLanguage: !Ref MagentoLanguage
         MagentoTimezone: !Ref MagentoTimezone
