@@ -179,6 +179,11 @@ EOF
 
 fi
 
+curl -s https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
+
 ./magento deploy:mode:set production
 
 ./magento info:adminuri > /home/ec2-user/adminuri
