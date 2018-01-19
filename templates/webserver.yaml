@@ -274,6 +274,7 @@ Resources:
             yum:
               nfs-utils: []
               awslogs: []
+              git: []
           files:
             /etc/awslogs/awslogs.conf:
               content: !Sub |
@@ -335,14 +336,27 @@ Resources:
                 aws_secret_access_key=${DeployerSecretKey}
               mode: '000600'
               owner: ec2-user
-              group: nginx
+              group: ec2-user
             /home/ec2-user/.aws/config:
               content: !Sub |
                 [default]
                 region=${AWS::Region}
               mode: '000600'
               owner: ec2-user
-              group: nginx
+              group: ec2-user
+            /home/ec2-user/.composer/auth.json:
+              content: !Sub |
+                {
+                  "http-basic": {
+                     "repo.magento.com": {
+                       "username": "1eb5caa8fbe588d329f7d813e11de90f",
+                       "password": "f8c1a6d64e0047951081861083d265a8"
+                     }
+                   }
+                }
+              mode: '000600'
+              owner: ec2-user
+              group: ec2-user
             /tmp/params.txt:
               content:
                 !Sub
@@ -409,6 +423,10 @@ Resources:
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MagentoAMI  --region ${AWS::Region}
             chmod a+x install_magento.sh
             ./install_magento.sh /tmp/params.txt
+            curl -s https://getcomposer.org/installer | php
+            mv composer.phar /usr/local/bin/composer
+            git config --global credential.helper '!aws codecommit credential-helper $@'
+            git config --global credential.UseHttpPath true
             /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/adminuri`" -r "Build Process Complete" '${MagentoAMIWaitHandle}'
       Tags:
       - Key: Application

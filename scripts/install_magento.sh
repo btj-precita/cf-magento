@@ -117,7 +117,7 @@ server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 80 default_server;
-        server_name demo.precita.vn www.demo.precita.vn;
+        server_name precita.vn www.precita.vn;
         root $MAGE_ROOT/pub/;
 
         index index.php;
@@ -299,10 +299,15 @@ upstream fastcgi_backend {
         server 127.0.0.1:9000 backup;
 }
 server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        return 301 https://$server_name$request_uri;
+}
+server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 443 ssl default_server;
-        server_name demo.precita.vn www.demo.precita.vn;
+        server_name precita.vn www.precita.vn;
         root $MAGE_ROOT/pub/;
 
         ssl_certificate /etc/ssl/certs/magento;

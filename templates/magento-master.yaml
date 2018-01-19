@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy Magento 2.1 on AWS (New VPC)
+Description: Deploy Magento 2.2 on AWS (New VPC)
 Metadata:
   LICENSE: Apache License Version 2.0
   AWS::CloudFormation::Interface:
@@ -404,7 +404,7 @@ Parameters:
       the Magento store (Check here for the supported Language command http://devdocs.magento.com/guides/v2.0/install-gde/install/cli/install-cli-install.html)
     Type: String
   MagentoReleaseMedia:
-    Default: 'https://s3-ap-southeast-2.amazonaws.com/precita-sources/Magento-CE-2.1.11-2017-12-11-08-55-15.tar.gz'
+    Default: 'https://s3-ap-southeast-2.amazonaws.com/precita-sources/Magento-CE-2.2.2-2017-12-11-09-21-15.tar.gz'
     Description: Amazon S3 path to download magento .tar.gz file (https://s3.amazonaws.com/mybucket/Magento-CE-2.1.9_sample_data-2017-09-13-03-57-21.tar.gz)
     Type: String
   MagentoTimezone:
