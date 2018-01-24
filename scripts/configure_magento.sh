@@ -179,8 +179,9 @@ EOF
 
 fi
 
-curl -s https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
+sudo chown -R ec2-user:ec2-user /home/ec2-user/.composer
+sudo curl -s https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
 git config --global credential.helper '!aws codecommit credential-helper $@'
 git config --global credential.UseHttpPath true
 
