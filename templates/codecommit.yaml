@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Git Repositories for E-commerce
+Resources:
+  CodeCommitSNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: CodeCommitTopic
+      TopicName: CodeCommitTopic
+  PrecitaRepository:
+    Type: "AWS::CodeCommit::Repository"
+    Properties:
+      RepositoryName: precita
+      RepositoryDescription: The First Jewelry E-commerce Project in Vietnam
+      Triggers:
+      - Name: DemoTrigger
+        CustomData: Project Precita Demo
+        DestinationArn:
+          Ref: CodeCommitSNSTopic
+        Branches:
+        - Demo
+        Events:
+        - all
+Outputs:
+  PrecitaRepositoryName:
+    Description: The Name of Precita Repository
+    Value: !GetAtt PrecitaRepository.Name
+    Export:
+      Name: !Sub "${AWS::StackName}-PrecitaRepositoryName"
+  PrecitaRepositoryARN:
+    Description: The ARN of Precita Repository
+    Value: !GetAtt PrecitaRepository.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-PrecitaRepositoryARN"
+  PrecitaRepositoryCloneUrlHttp:
+    Description: The HTTP Clone URL of Precita Repository
+    Value: !GetAtt PrecitaRepository.CloneUrlHttp
+    Export:
+      Name: !Sub "${AWS::StackName}-PrecitaRepositoryCloneUrlHttp"
+  PrecitaRepositoryCloneUrlSsh:
+    Description: The SSH Clone URL of Precita Repository
+    Value: !GetAtt PrecitaRepository.CloneUrlSsh
+    Export:
+      Name: !Sub "${AWS::StackName}-PrecitaRepositoryCloneUrlSsh"
