@@ -138,6 +138,7 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       DBName: !Ref DBName
+      DBInstanceIdentifier: !Sub MySQLDB-Master-${AWS::StackName}
       AllocatedStorage: !Ref DBAllocatedStorage
       DBInstanceClass: !Ref DBInstanceClass
       Engine: MySQL
