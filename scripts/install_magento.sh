@@ -61,8 +61,26 @@ fi
 EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
 EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
+# Add default locale
+cat << EOF > /etc/environment
+LANG=en_US.utf-8
+LC_ALL=en_US.utf-8
+EOF
+
+# BANNER CONFIGURATION
+BANNER_FILE="/etc/ssh_banner"
+if [ $BANNER_FILE ] ;then
+    echo "[INFO] Installing banner ... "
+    echo -e "\n Banner ${BANNER_FILE}" >>/etc/ssh/sshd_config
+else
+    echo "[INFO] banner file is not accessible skipping ..."
+    exit 1;
+fi
+
 yum -y update
-yum -y install nginx php70-fpm php70-cli php70-mysqlnd php70-soap php70-xml php70-zip php70-json php70-mcrypt php70-intl php70-mbstring php70-zip php70-opcache php70-gd mysql56
+yum -y install nginx php70-fpm php70-cli php70-mysqlnd php70-soap php70-xml php70-zip php70-json php70-mcrypt php70-intl php70-mbstring php70-zip php70-opcache php70-gd php70-devel php7-pear gcc mysql56
+yum -y install ImageMagick ImageMagick-devel
+pecl7 install imagick
 
 chkconfig nginx on
 chkconfig php-fpm-7.0 on
@@ -365,6 +383,14 @@ server {
             try_files $uri $uri/ /index.php?$args;
         }
 
+        location /productfilter/ {
+            gzip on;
+        }
+
+        location /customer/ {
+            gzip on;
+        }
+
         location /pub/ {
             location ~ ^/pub/media/(downloadable|customer|import|theme_customization/.*\.xml) {
                 deny all;
@@ -629,6 +655,9 @@ opcache.fast_shutdown = 1
 opcache.enable_cli = 0
 opcache.enable = 1
 EOF
+
+# Add ImageMagick Extenstion
+echo "extension=imagick.so" > /etc/php.d/20-imagick.ini
 
 mkdir -p /var/www/html
 chown ec2-user:nginx /var/www/html

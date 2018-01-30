@@ -6,6 +6,11 @@ Resources:
     Properties:
       DisplayName: CodeCommitTopic
       TopicName: CodeCommitTopic
+  InfrastructureRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: precita-infras
+      RepositoryDescription: The CloudFormation Infrastructure for Precita
   PrecitaRepository:
     Type: "AWS::CodeCommit::Repository"
     Properties:
@@ -41,3 +46,23 @@ Outputs:
     Value: !GetAtt PrecitaRepository.CloneUrlSsh
     Export:
       Name: !Sub "${AWS::StackName}-PrecitaRepositoryCloneUrlSsh"
+  InfrastructureRepositoryName:
+    Description: The Name of Precita Infrastructure Repository
+    Value: !GetAtt InfrastructureRepository.Name
+    Export:
+      Name: !Sub "${AWS::StackName}-InfrastructureRepositoryName"
+  InfrastructureRepositoryARN:
+    Description: The ARN of Precita InfrastructureRepository Repository
+    Value: !GetAtt InfrastructureRepository.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-InfrastructureRepositoryARN"
+  InfrastructureRepositoryCloneUrlHttp:
+    Description: The HTTP Clone URL of Precita Infrastructure Repository
+    Value: !GetAtt InfrastructureRepository.CloneUrlHttp
+    Export:
+      Name: !Sub "${AWS::StackName}-InfrastructureRepositoryCloneUrlHttp"
+  InfrastructureRepositoryCloneUrlSsh:
+    Description: The SSH Clone URL of Precita Infrastructure Repository
+    Value: !GetAtt InfrastructureRepository.CloneUrlSsh
+    Export:
+      Name: !Sub "${AWS::StackName}-InfrastructureRepositoryCloneUrlSsh"
