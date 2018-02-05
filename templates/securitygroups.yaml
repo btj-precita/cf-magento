@@ -93,6 +93,10 @@ Resources:
         FromPort: '465'
         ToPort: '465'
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '587'
+        ToPort: '587'
+        CidrIp: 0.0.0.0/0
   ElastiCacheSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

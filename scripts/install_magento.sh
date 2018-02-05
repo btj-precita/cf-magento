@@ -127,6 +127,18 @@ events {
 }
 
 http {
+
+gzip on;
+gzip_disable "msie6";
+
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_buffers 16 8k;
+gzip_http_version 1.1;
+gzip_min_length 256;
+gzip_types *;
+
 upstream fastcgi_backend {
         server unix:/tmp/php-cgi.socket;
         server 127.0.0.1:9000 backup;
@@ -135,7 +147,7 @@ server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 80 default_server;
-        server_name precita.vn www.precita.vn;
+        server_name ${cname} www.${cname};
         root $MAGE_ROOT/pub/;
 
         index index.php;
@@ -312,20 +324,36 @@ events {
 }
 
 http {
+
+gzip on;
+gzip_disable "msie6";
+
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_buffers 16 8k;
+gzip_http_version 1.1;
+gzip_min_length 256;
+gzip_types *;
+
 upstream fastcgi_backend {
         server unix:/tmp/php-cgi.socket;
         server 127.0.0.1:9000 backup;
 }
+
 server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-        return 301 https://$server_name$request_uri;
+        listen         80;
+        server_name    $cname www.$cname;
+        if ($http_x_forwarded_proto != "https") {
+            rewrite ^(.*)$ https://$server_name$REQUEST_URI permanent;
+        }
 }
+
 server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 443 ssl default_server;
-        server_name precita.vn www.precita.vn;
+        server_name ${cname} www.${cname};
         root $MAGE_ROOT/pub/;
 
         ssl_certificate /etc/ssl/certs/magento;

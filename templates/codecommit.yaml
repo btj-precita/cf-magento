@@ -25,6 +25,11 @@ Resources:
         - Demo
         Events:
         - all
+  DeploymentRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: precita-deploy
+      RepositoryDescription: The CloudFormation Deployment for Precita
 Outputs:
   PrecitaRepositoryName:
     Description: The Name of Precita Repository
@@ -66,3 +71,23 @@ Outputs:
     Value: !GetAtt InfrastructureRepository.CloneUrlSsh
     Export:
       Name: !Sub "${AWS::StackName}-InfrastructureRepositoryCloneUrlSsh"
+  DeploymentRepositoryName:
+    Description: The Name of Deployment Repository
+    Value: !GetAtt DeploymentRepository.Name
+    Export:
+      Name: !Sub "${AWS::StackName}-DeploymentRepositoryName"
+  DeploymentRepositoryARN:
+    Description: The ARN of Deployment Repository
+    Value: !GetAtt DeploymentRepository.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-DeploymentRepositoryARN"
+  DeploymentRepositoryCloneUrlHttp:
+    Description: The HTTP Clone URL of Deployment Repository
+    Value: !GetAtt DeploymentRepository.CloneUrlHttp
+    Export:
+      Name: !Sub "${AWS::StackName}-DeploymentRepositoryCloneUrlHttp"
+  DeploymentRepositoryCloneUrlSsh:
+    Description: The SSH Clone URL of Deployment Repository
+    Value: !GetAtt DeploymentRepository.CloneUrlSsh
+    Export:
+      Name: !Sub "${AWS::StackName}-DeploymentRepositoryCloneUrlSsh"
