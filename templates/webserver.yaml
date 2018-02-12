@@ -88,7 +88,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: precita-sources
+    Default: sources
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -434,9 +434,9 @@ Resources:
             /opt/aws/bin/cfn-signal -e $? -d "`cat /home/ec2-user/adminuri`" -r "Build Process Complete" '${MagentoAMIWaitHandle}'
       Tags:
       - Key: Application
-        Value: Precita Demo (Magento)
+        Value: Precita Stage (Magento)
       - Key: Name
-        Value: MagentoAMI (Precita Demo)
+        Value: PrecitaAMI (Stage)
   AMIInfoFunctionExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -547,7 +547,8 @@ Resources:
       MaxSize: !Ref WebServerMaxSize
       DesiredCapacity: !Ref WebServerDesiredCapacity
       TargetGroupARNs:
-      - !Ref ALBTargetGroup
+      - !Ref ALBTargetGroupHTTP
+      - !Ref ALBTargetGroupHTTPS
       VPCZoneIdentifier: !Ref WebServerSubnets
       NotificationConfiguration:
         TopicARN: !Ref NotificationTopic

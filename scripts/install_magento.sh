@@ -147,7 +147,7 @@ server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 80 default_server;
-        server_name ${cname} www.${cname};
+        server_name precita.vn www.precita.vn;
         root $MAGE_ROOT/pub/;
 
         index index.php;
@@ -343,7 +343,7 @@ upstream fastcgi_backend {
 
 server {
         listen         80;
-        server_name    $cname www.$cname;
+        server_name    precita.vn www.precita.vn;
         if ($http_x_forwarded_proto != "https") {
             rewrite ^(.*)$ https://$server_name$REQUEST_URI permanent;
         }
@@ -353,7 +353,7 @@ server {
         set $MAGE_ROOT /var/www/html;
         include /etc/nginx/mime.types;
         listen 443 ssl default_server;
-        server_name ${cname} www.${cname};
+        server_name precita.vn www.precita.vn;
         root $MAGE_ROOT/pub/;
 
         ssl_certificate /etc/ssl/certs/magento;
@@ -409,14 +409,6 @@ server {
 
         location / {
             try_files $uri $uri/ /index.php?$args;
-        }
-
-        location /productfilter/ {
-            gzip on;
-        }
-
-        location /customer/ {
-            gzip on;
         }
 
         location /pub/ {

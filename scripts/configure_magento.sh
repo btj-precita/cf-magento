@@ -51,17 +51,20 @@ git pull
 cat << EOF > ~/codedeploy
 #!/bin/bash
 # Simple Script for Magento Single Server Deployment #
-cd /home/ec2-user/precita/
+cd /var/www/html/
+git checkout app/etc/config.php
 git pull
-git status
-read -n1 -r -p "Press any key to continue..." key
-cd /home/ec2-user/precita/app
-cp -R design /var/www/html/app/
-cp -R code /var/www/html/app/
+/var/www/html/bin/magento maintenance:enable
+if [ "pmrhol7wi3cvml.c6hhjgksnklt.ap-southeast-1.rds.amazonaws.com" = "update" ]
+then
+  echo "Deploying with composer update"
+  composer update
+fi
 /var/www/html/bin/magento maintenance:enable
 /var/www/html/bin/magento setup:upgrade
 /var/www/html/bin/magento setup:di:compile
 /var/www/html/bin/magento setup:static-content:deploy vi_VN en_US
+/var/www/html/bin/magento cache:enable
 /var/www/html/bin/magento maintenance:disable
 EOF
 chmod +x ~/codedeploy
