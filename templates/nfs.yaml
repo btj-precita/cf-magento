@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Magento 2.2 NFS (Network File System) Template
+Parameters:
+  KeyPair:
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+    Default: precita_stage
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: sources
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: cloudformation/magento/stage/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  DeployerAccessKey:
+    Description: Access key of deployer
+    Type: String
+  DeployerSecretKey:
+    Description: Secret key of deployer
+    Type: String
+  VPCID:
+    Description: VPC ID
+    Type: AWS::EC2::VPC::Id
+  NFSServerInstanceType:
+    AllowedValues:
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m4.10xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c3.large
+    - c3.xlarge
+    - c3.2xlarge
+    - c3.4xlarge
+    - c3.8xlarge
+    - r3.large
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r3.8xlarge
+    - i2.xlarge
+    - i2.2xlarge
+    - i2.4xlarge
+    - i2.8xlarge
+    ConstraintDescription: Choose an instance type.
+    Default: m4.large
+    Description: Web Server node instance type
+    Type: String
+  NFSServerSecurityGroup:
+    Description: Web Server Security Group
+    Type: AWS::EC2::SecurityGroup::Id
+  NFSServerSubnets:
+    ConstraintDescription: must be list of existing subnet Ids
+    Default: ''
+    Description: A list of subnet identifiers of Amazon VPCs where the WebServer Autoscaling
+      would be launched.
+    Type: List<AWS::EC2::Subnet::Id>
+Mappings:
+  AWSAMIRegionMap:
+    AMI:
+      AMZNLINUXHVM: amzn-ami-hvm-2017.09.1.20180108-x86_64-gp2
+    ap-northeast-1:
+      AMZNLINUXHVM: ami-33c25b55
+    ap-northeast-2:
+      AMZNLINUXHVM: ami-d9b616b7
+    ap-south-1:
+      AMZNLINUXHVM: ami-fedb8f91
+    ap-southeast-1:
+      AMZNLINUXHVM: ami-889cecf4
+    ap-southeast-2:
+      AMZNLINUXHVM: ami-ccab56ae
+    ca-central-1:
+      AMZNLINUXHVM: ami-61f97c05
+    eu-central-1:
+      AMZNLINUXHVM: ami-0fc85a60
+    eu-west-1:
+      AMZNLINUXHVM: ami-e487179d
+    eu-west-2:
+      AMZNLINUXHVM: ami-51809835
+    sa-east-1:
+      AMZNLINUXHVM: ami-1226647e
+    us-east-1:
+      AMZNLINUXHVM: ami-cb9ec1b1
+    us-east-2:
+      AMZNLINUXHVM: ami-caaf84af
+    us-west-1:
+      AMZNLINUXHVM: ami-95eeeef5
+    us-west-2:
+      AMZNLINUXHVM: ami-32cf7b4a
+Resources:
+  NFSServer:
+    Type: "AWS::EC2::Instance"
+    Metadata:
+      Comment: Install a NFS server
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: "Precita-Stage-MagentoStack-3YJC-NewIamInstanceRole-1OGT3CGAUCGB3"
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              nfs-utils: []
+              nfs-utils-lib: []
+              awslogs: []
+        files:
+          /etc/awslogs/awslogs.conf:
+            content: !Sub |
+              [general]
+              state_file= /var/log/agent-state
+              [/home/ec2-user/misc/install]
+              file = /var/log/cloud-init-output.log
+              log_group_name = ${NFSMainLogGroup}
+              log_stream_name = {instance_id}/nfs/install.log
+            mode: '000400'
+            owner: root
+            group: root
+          /etc/awslogs/awscli.conf:
+            content: !Sub |
+              [plugins]
+              cwlogs = cwlogs
+              [default]
+              region = ${AWS::Region}
+            mode: '000400'
+            owner: root
+            group: root
+          /etc/cfn/cfn-hup.conf:
+            content: !Sub |
+              [main]
+              stack=${AWS::StackId}
+              region=${AWS::Region}
+            mode: '000400'
+            owner: root
+            group: root
+          /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+            content: !Sub |
+              [cfn-auto-reloader-hook]
+              triggers=post.update
+              path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init
+              action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region}
+              runas=root
+          /etc/ssh_banner:
+            source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/banner_message_nfs_server.txt
+            mode: '000644'
+            owner: root
+            group: root
+            authentication: S3AccessCreds
+          /install_nfs_server.sh:
+            source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/install_nfs_server.sh
+            mode: '000644'
+            owner: root
+            group: root
+            authentication: S3AccessCreds
+          /configure_nfs_server.sh:
+            source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/configure_nfs_server.sh
+            mode: '000644'
+            owner: root
+            group: root
+            authentication: S3AccessCreds
+          /home/ec2-user/.aws/credentials:
+            content: !Sub |
+              [default]
+              aws_access_key_id=${DeployerAccessKey}
+              aws_secret_access_key=${DeployerSecretKey}
+            mode: '000600'
+            owner: ec2-user
+            group: ec2-user
+          /home/ec2-user/.aws/config:
+            content: !Sub |
+              [default]
+              region=${AWS::Region}
+            mode: '000600'
+            owner: ec2-user
+            group: ec2-user
+    Properties:
+      KeyName: !Ref KeyPair
+      IamInstanceProfile: "Precita-Stage-MagentoStack-3YJCAD6JNAKB-WebServerASGStack-1C0X7WISSRC40-NewIamInstanceProfile-157L9M7UV4OX9"
+      ImageId:
+        !FindInMap
+        - AWSAMIRegionMap
+        - !Ref AWS::Region
+        - AMZNLINUXHVM
+      InstanceType: !Ref NFSServerInstanceType
+      SubnetId:
+        !Select
+        - '0'
+        - !Ref NFSServerSubnets
+      SecurityGroupIds:
+      - !Ref NFSServerSecurityGroup
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #!/bin/bash
+            echo "Start running init" >> /tmp/startup.log
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource NFSServer  --region ${AWS::Region}
+            chmod a+x install_nfs_server.sh
+            echo "Start running install jenkins" >> /tmp/startup.log
+            ./install_nfs_server.sh 2>&1 >> /tmp/startup.log
+      Tags:
+      - Key: Application
+        Value: Precita NFS Server
+      - Key: Name
+        Value: NFSServer

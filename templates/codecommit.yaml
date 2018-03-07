@@ -30,6 +30,11 @@ Resources:
     Properties:
       RepositoryName: precita-deploy
       RepositoryDescription: The CloudFormation Deployment for Precita
+  NetsuiteRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: precita-netsuite
+      RepositoryDescription: Netsuite repository for Precita
 Outputs:
   PrecitaRepositoryName:
     Description: The Name of Precita Repository
@@ -91,3 +96,23 @@ Outputs:
     Value: !GetAtt DeploymentRepository.CloneUrlSsh
     Export:
       Name: !Sub "${AWS::StackName}-DeploymentRepositoryCloneUrlSsh"
+  NetsuiteRepositoryName:
+    Description: The Name of Netsuite Repository
+    Value: !GetAtt NetsuiteRepository.Name
+    Export:
+      Name: !Sub "${AWS::StackName}-NetsuiteRepositoryName"
+  NetsuiteRepositoryARN:
+    Description: The ARN of Netsuite Repository
+    Value: !GetAtt NetsuiteRepository.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-NetsuiteRepositoryARN"
+  NetsuiteRepositoryCloneUrlHttp:
+    Description: The HTTP Clone URL of Netsuite Repository
+    Value: !GetAtt NetsuiteRepository.CloneUrlHttp
+    Export:
+      Name: !Sub "${AWS::StackName}-NetsuiteRepositoryCloneUrlHttp"
+  NetsuiteRepositoryCloneUrlSsh:
+    Description: The SSH Clone URL of Netsuite Repository
+    Value: !GetAtt NetsuiteRepository.CloneUrlSsh
+    Export:
+      Name: !Sub "${AWS::StackName}-NetsuiteRepositoryCloneUrlSsh"
