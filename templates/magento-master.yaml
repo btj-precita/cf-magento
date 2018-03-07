@@ -466,7 +466,6 @@ Parameters:
     Description: Allowed CIDR block for external SSH access to the bastions
     Type: String
   SSLCertificateId:
-    Default: 'arn:aws:acm:ap-southeast-1:226282970616:certificate/09895441-ad72-4108-b923-7ac548cbc82b'
     Description: (Optional) The ARN of the SSL certificate to use for the webserver.
       [optional]
     Type: String
