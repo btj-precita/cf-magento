@@ -45,5 +45,6 @@ set daemon 60
 # Include all files from /etc/monit.d/
 include /etc/monit.d/*
 EOF
+monit
 monit reload
 monit status

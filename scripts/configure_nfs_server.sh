@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 
-echo "parameters: ${allowed_hosts}"
+# Set an initial value
+
+function exportParams() {
+    allowed_hosts=`grep 'AllowedHost' ${PARAMS_FILE} | awk -F'|' '{print $2}' | sed -e 's/^ *//g;s/ *$//g'`
+}
+
+allowed_hosts='NONE'
+
+PARAMS_FILE="/tmp/params.txt"
+if [ -f ${PARAMS_FILE} ]; then
+    echo "Extracting parameter values from params file"
+    exportParams
+else
+    echo "Parameters file not found or inaccessible."
+    exit 1
+fi
+
 # CONFIGURE NFS SERVER #
 # FORMAT SHARED PARTITION
 FORMAT_SHARED_DISK_FILE="/tmp/format_shared_disk.sh"
