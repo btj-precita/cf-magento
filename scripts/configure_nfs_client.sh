@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 rundate=`date +%Y%m%d%H%M`
-#nfs_server_host=$1
+if [ $# -ne 1 ]; then
+    echo $0: usage: configure_nfs_client.sh "<nfs-server-host>"
+    exit 1
+fi
+nfs_server_host=$1
 
 # Backup
 /var/www/html/bin/magento maintenance:enable

@@ -31,6 +31,8 @@ fi
 # CONFIGURE SHARED DIRECTORY
 mkdir -p /precita
 mount /dev/xvdh1 /precita/
+# Mount at boot
+echo "/dev/xvdh1    /precita    ext4    defaults    0   2" | sudo tee -a /etc/fstab
 mkdir -p /precita/media
 adduser nginx
 chown -R ec2-user:nginx /precita/media
