@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Magento 2.2 Cron Server Template
+Parameters:
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  NotificationEmail:
+    Type: String
+    Description: Email address to notify if there are any scaling operations
+    AllowedPattern: ([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)
+    ConstraintDescription: Must be a valid email address.
+  CronServerDesiredCapacity:
+    Type: Number
+    Description: Desired No of web server instances
+    Default: '1'
+  CronServerInstanceType:
+    Type: String
+    Description: Web Server node instance type
+    AllowedValues:
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m4.10xlarge
+    - m3.medium
+    - m3.large
+    - m3.xlarge
+    - m3.2xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - c5.9xlarge
+    - c5.18xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c3.large
+    - c3.xlarge
+    - c3.2xlarge
+    - c3.4xlarge
+    - c3.8xlarge
+    - r3.large
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r3.8xlarge
+    - i2.xlarge
+    - i2.2xlarge
+    - i2.4xlarge
+    - i2.8xlarge
+    ConstraintDescription: Choose an instance type.
+    Default: c5.large
+  CronServerMaxSize:
+    Type: Number
+    Description: Maximum No of web server instances
+    Default: '1'
+  CronServerMinSize:
+    Type: Number
+    Description: Minimum No of web server instances
+    Default: '1'
+  CronServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Web Server Security Group
+  CronServerSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    ConstraintDescription: must be list of existing subnet Ids
+    Description: A list of subnet identifiers of Amazon VPCs where the WebServer Autoscaling
+      would be launched.
+  CronServerImageId:
+    Type: AWS::EC2::Image::Id
+    Description: AWS AMI used for Cron Server
+  IamInstanceRole:
+    Type: String
+    Description: Instance Profile for Cron Server
+Resources:
+  IamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref IamInstanceRole
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref NotificationEmail
+        Protocol: email
+  CronServerASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref CronServerLC
+      MinSize: !Ref CronServerMinSize
+      MaxSize: !Ref CronServerMaxSize
+      DesiredCapacity: !Ref CronServerDesiredCapacity
+      VPCZoneIdentifier: !Ref CronServerSubnets
+      NotificationConfiguration:
+        TopicARN: !Ref NotificationTopic
+        NotificationTypes:
+        - autoscaling:EC2_INSTANCE_LAUNCH
+        - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+        - autoscaling:EC2_INSTANCE_TERMINATE
+        - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-AutoScalingGroup
+        PropagateAtLaunch: 'true'
+  CronServerLC:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    # DependsOn: CreateAMI
+    Properties:
+      ImageId: !Ref CronServerImageId
+      InstanceType: !Ref CronServerInstanceType
+      SecurityGroups:
+      - !Ref CronServerSecurityGroup
+      IamInstanceProfile: !Ref IamInstanceProfile
+      KeyName: !Ref KeyPair
+      UserData:
+        !Base64
+          Fn::Sub: |
+            #cloud-config
+            runcmd:
+            - sudo -u ec2-user /var/www/html/bin/magento setup:static-content:deploy -f
+            - sudo -u ec2-user /var/www/html/bin/magento cron:install
+  CronServerTargetTrackingScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref CronServerASG
+      Cooldown: '60'
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 80.0
