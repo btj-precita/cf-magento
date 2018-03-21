@@ -35,6 +35,11 @@ Resources:
     Properties:
       RepositoryName: precita-netsuite
       RepositoryDescription: Netsuite repository for Precita
+  ServerlessRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: precita-serverless
+      RepositoryDescription: The CloudFormation Serverless Functions for Precita
 Outputs:
   PrecitaRepositoryName:
     Description: The Name of Precita Repository
